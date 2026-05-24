@@ -1,0 +1,10 @@
+streamlit
+openai
+python-dotenv
+pandas
+matplotlib
+transformers
+torch
+accelerate
+sentencepiece
+safetensors
