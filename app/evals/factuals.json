@@ -1,0 +1,21 @@
+[
+    {
+        "prompt": "Capital of France?",
+        "expected": "Paris"
+    },
+
+    {
+        "prompt": "Who won FIFA 2022?",
+        "expected": "Argentina"
+    },
+
+    {
+        "prompt": "How many vowels are in shreyank?",
+        "expected": "2"
+    },
+
+    {
+        "prompt": "What is CUDA?",
+        "expected": "parallel computing platform"
+    }
+]
