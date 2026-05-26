@@ -1,12 +1,14 @@
-conversation = []
+conversation_history = []
+
 
 def add_message(role, content):
 
-    conversation.append({
+    conversation_history.append({
         "role": role,
         "content": content
     })
 
-def get_context(limit=6):
 
-    return conversation[-limit:]
+def get_history():
+
+    return conversation_history[-10:]
