@@ -1,34 +1,19 @@
-from transformers import (
-    pipeline,
-    AutoTokenizer
-)
-
-from opentelemetry import trace
+import os
+import requests
 
 from telemetry import tracer
 
 
-MODEL_NAME ="Qwen/Qwen2.5-0.5B-Instruct"
+MODEL_NAME = "google/gemma-2-2b-it"
 
+API_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 
-# ----------------------------------------
-# Load tokenizer
-# ----------------------------------------
+HEADERS = {
 
-tokenizer = AutoTokenizer.from_pretrained(
-    MODEL_NAME
-)
+    "Authorization": f"Bearer {os.getenv('NVIDIA_API_KEY')}",
 
-
-# ----------------------------------------
-# Load generation pipeline
-# ----------------------------------------
-
-pipe = pipeline(
-    "text-generation",
-    model=MODEL_NAME,
-    tokenizer=tokenizer
-)
+    "Content-Type": "application/json"
+}
 
 
 # ----------------------------------------
@@ -38,10 +23,12 @@ pipe = pipeline(
 def generate_response(messages):
 
     print("\n[OBSERVABILITY] Starting inference...\n")
+
     print("GENERATE_RESPONSE FUNCTION CALLED")
 
+
     with tracer.start_as_current_span(
-        "oss_model_inference"
+        "nvidia_gemma_inference"
     ) as span:
 
         span.set_attribute(
@@ -54,41 +41,57 @@ def generate_response(messages):
             len(messages)
         )
 
-        prompt = tokenizer.apply_chat_template(
+        payload = {
 
-            messages,
+            "model": MODEL_NAME,
 
-            tokenize=False,
+            "messages": messages,
 
-            add_generation_prompt=True
-        )
+            "temperature": 0.7,
 
-        response = pipe(
+            "max_tokens": 120
+        }
 
-            prompt,
+        try:
 
-            max_new_tokens=120,
+            response = requests.post(
 
-            temperature=0.7,
+                API_URL,
 
-            do_sample=True,
+                headers=HEADERS,
 
-            truncation=True
-        )
+                json=payload,
 
-        generated_text = response[0][
-            "generated_text"
-        ]
+                timeout=60
+            )
 
-        assistant_reply = generated_text[
-            len(prompt):
-        ]
+            result = response.json()
 
-        span.set_attribute(
-            "response.length",
-            len(assistant_reply)
-        )
+            assistant_reply = result[
+                "choices"
+            ][0][
+                "message"
+            ][
+                "content"
+            ]
 
-        print("\n[OBSERVABILITY] Inference completed.\n")
+            span.set_attribute(
+                "response.length",
+                len(assistant_reply)
+            )
 
-        return assistant_reply.strip()
+            print(
+                "\n[OBSERVABILITY] Inference completed.\n"
+            )
+
+            return assistant_reply.strip()
+
+        except Exception as e:
+
+            error_message = (
+                f"Inference Error: {str(e)}"
+            )
+
+            print(error_message)
+
+            return error_message

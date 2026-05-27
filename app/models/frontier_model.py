@@ -1,32 +1,97 @@
 import os
+import requests
 
-from dotenv import load_dotenv
-from openai import OpenAI
+from telemetry import tracer
 
-load_dotenv()
 
-client = OpenAI(
-    base_url="https://integrate.api.nvidia.com/v1",
-    api_key=os.getenv("NVIDIA_API_KEY")
-)
+MODEL_NAME = "google/gemma-2-2b-it"
 
-def generate_response(prompt):
+API_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 
-    completion = client.chat.completions.create(
+HEADERS = {
 
-        model="moonshotai/kimi-k2.6",
+    "Authorization": f"Bearer {os.getenv('NVIDIA_API_KEY')}",
 
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
+    "Content-Type": "application/json"
+}
 
-        temperature=0.3,
-        top_p=0.95,
-        max_tokens=60,
-        stream=False
-    )
 
-    return completion.choices[0].message.content
+# ----------------------------------------
+# Generate response
+# ----------------------------------------
+
+def generate_response(messages):
+
+    print("\n[OBSERVABILITY] Starting inference...\n")
+
+    print("GENERATE_RESPONSE FUNCTION CALLED")
+
+
+    with tracer.start_as_current_span(
+        "nvidia_gemma_inference"
+    ) as span:
+
+        span.set_attribute(
+            "model.name",
+            MODEL_NAME
+        )
+
+        span.set_attribute(
+            "conversation.length",
+            len(messages)
+        )
+
+        payload = {
+
+            "model": MODEL_NAME,
+
+            "messages": messages,
+
+            "temperature": 0.7,
+
+            "max_tokens": 120
+        }
+
+        try:
+
+            response = requests.post(
+
+                API_URL,
+
+                headers=HEADERS,
+
+                json=payload,
+
+                timeout=60
+            )
+
+            result = response.json()
+
+            assistant_reply = result[
+                "choices"
+            ][0][
+                "message"
+            ][
+                "content"
+            ]
+
+            span.set_attribute(
+                "response.length",
+                len(assistant_reply)
+            )
+
+            print(
+                "\n[OBSERVABILITY] Inference completed.\n"
+            )
+
+            return assistant_reply.strip()
+
+        except Exception as e:
+
+            error_message = (
+                f"Inference Error: {str(e)}"
+            )
+
+            print(error_message)
+
+            return error_message
