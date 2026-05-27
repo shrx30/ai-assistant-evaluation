@@ -1,5 +1,42 @@
-from dataclasses import dataclass
-from typing import Dict
+import json
+
+from dataclasses import (
+    dataclass
+)
+
+
+def make_serializable(obj):
+
+    try:
+
+        json.dumps(obj)
+
+        return obj
+
+    except Exception:
+
+        if isinstance(obj, dict):
+
+            return {
+
+                str(k):
+                make_serializable(v)
+
+                for k, v in obj.items()
+            }
+
+        elif isinstance(obj, list):
+
+            return [
+
+                make_serializable(x)
+
+                for x in obj
+            ]
+
+        else:
+
+            return str(obj)
 
 
 @dataclass
@@ -17,7 +54,7 @@ class LogEvent:
 
     unsafe: bool
 
-    plan: Dict
+    plan: object
 
     observation: str
 
@@ -45,7 +82,9 @@ class LogEvent:
             self.unsafe,
 
             "plan":
-            self.plan,
+            make_serializable(
+                self.plan
+            ),
 
             "observation":
             self.observation
