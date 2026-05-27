@@ -3,10 +3,12 @@ import uuid
 
 from datetime import datetime
 
-from models.oss_model import (
-    generate_response
+from core.planner import (
+    create_plan
 )
-
+from models.oss_model import (
+    stream_response
+)
 from memory.memory_manager import (
     add_message,
     get_history
@@ -20,10 +22,24 @@ from core.config import (
     BLOCKED_WORDS
 )
 
+from tools.tool_router import (
+    execute_tool
+)
+
+from core.planner import (
+    create_plan
+)
+from core.agent_loop import (
+    run_agent
+)
 
 def process_chat(user_input):
 
     trace_id = str(uuid.uuid4())
+
+    plan = create_plan(
+    user_input
+       )
 
     add_message(
         "user",
@@ -41,6 +57,11 @@ def process_chat(user_input):
 
     start_time = time.time()
 
+
+    # --------------------------------
+    # Guardrails
+    # --------------------------------
+
     if unsafe:
 
         response = (
@@ -49,9 +70,31 @@ def process_chat(user_input):
 
     else:
 
-        response = generate_response(
-            history
-        )
+        # ----------------------------
+        # Tool Execution
+        # ----------------------------
+        plan = create_plan(
+        user_input
+          )  
+        
+
+
+        agent_result = run_agent(
+    user_input
+)
+
+        plan = agent_result[
+    "plan"
+]
+
+        observation = agent_result[
+    "observation"
+]
+
+        response = agent_result[
+    "response_stream"
+]
+
 
     end_time = time.time()
 
@@ -59,6 +102,11 @@ def process_chat(user_input):
         end_time - start_time,
         2
     )
+
+
+    # --------------------------------
+    # Observability Logs
+    # --------------------------------
 
     log_data = {
 
@@ -72,15 +120,28 @@ def process_chat(user_input):
 
         "response": response,
 
-        "unsafe": unsafe
+        "unsafe": unsafe,
+
+        "plan": plan,
+
+
+        
+
+        "observation": observation,
     }
 
     save_log(log_data)
+
+
+    # --------------------------------
+    # Save Assistant Response
+    # --------------------------------
 
     add_message(
         "assistant",
         response
     )
+
 
     return {
 

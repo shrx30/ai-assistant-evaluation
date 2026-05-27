@@ -2,8 +2,11 @@ import os
 
 from openai import OpenAI
 
-
-MODEL_NAME = "google/gemma-2-2b-it"
+from core.config import (
+    MODEL_NAME,
+    TEMPERATURE,
+    MAX_TOKENS
+)
 
 
 client = OpenAI(
@@ -14,11 +17,7 @@ client = OpenAI(
 )
 
 
-# ----------------------------------------
-# Generate response
-# ----------------------------------------
-
-def generate_response(messages):
+def stream_response(messages):
 
     try:
 
@@ -28,16 +27,14 @@ def generate_response(messages):
 
             messages=messages,
 
-            temperature=0.7,
+            temperature=TEMPERATURE,
 
             top_p=0.7,
 
-            max_tokens=256,
+            max_tokens=MAX_TOKENS,
 
             stream=True
         )
-
-        full_response = ""
 
         for chunk in completion:
 
@@ -49,14 +46,10 @@ def generate_response(messages):
                 is not None
             ):
 
-                content = chunk.choices[
+                yield chunk.choices[
                     0
                 ].delta.content
 
-                full_response += content
-
-        return full_response.strip()
-
     except Exception as e:
 
-        return f"Inference Error: {str(e)}"
+        yield f"Inference Error: {str(e)}"

@@ -1,5 +1,4 @@
 import streamlit as st
-import time
 import json
 
 import pandas as pd
@@ -7,6 +6,10 @@ import matplotlib.pyplot as plt
 
 from services.chat_service import (
     process_chat
+)
+
+from memory.memory_manager import (
+    clear_memory
 )
 
 
@@ -25,7 +28,7 @@ st.set_page_config(
 
 
 # =================================
-# SIDEBAR
+# SIDEBAR NAVIGATION
 # =================================
 
 page = st.sidebar.radio(
@@ -37,6 +40,23 @@ page = st.sidebar.radio(
         "Observability Dashboard"
     ]
 )
+
+
+# =================================
+# MEMORY CONTROLS
+# =================================
+
+if st.sidebar.button(
+    "Clear Memory"
+):
+
+    clear_memory()
+
+    st.session_state.messages = []
+
+    st.sidebar.success(
+        "Memory Cleared"
+    )
 
 
 # =================================
@@ -80,7 +100,7 @@ if page == "Chatbot":
 
 
     # -----------------------------
-    # CHAT EXECUTION
+    # MAIN CHAT FLOW
     # -----------------------------
 
     if user_input:
@@ -106,7 +126,7 @@ if page == "Chatbot":
             user_input
         )
 
-        response = result[
+        response_stream = result[
             "response"
         ]
 
@@ -154,18 +174,6 @@ if page == "Chatbot":
 
 
         # -------------------------
-        # SAVE ASSISTANT MESSAGE
-        # -------------------------
-
-        st.session_state.messages.append({
-
-            "role": "assistant",
-
-            "content": response
-        })
-
-
-        # -------------------------
         # STREAM RESPONSE
         # -------------------------
 
@@ -175,15 +183,25 @@ if page == "Chatbot":
 
             full_text = ""
 
-            for word in response.split():
+            for chunk in response_stream:
 
-                full_text += word + " "
+                full_text += chunk
 
                 placeholder.markdown(
                     full_text
                 )
 
-                time.sleep(0.02)
+
+        # -------------------------
+        # SAVE ASSISTANT MESSAGE
+        # -------------------------
+
+        st.session_state.messages.append({
+
+            "role": "assistant",
+
+            "content": full_text
+        })
 
 
 # =================================

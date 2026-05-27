@@ -3,28 +3,39 @@ from tools.tool_registry import (
 )
 
 
-def execute_tool(
+def execute_tool(user_input):
 
-    tool_name,
+    lowered = user_input.lower()
 
-    tool_input,
 
-    trace_id
-):
+    if "time" in lowered:
 
-    tool_meta = TOOL_REGISTRY.get(
-        tool_name
-    )
+        return TOOL_REGISTRY[
+            "time"
+        ](user_input)
 
-    if not tool_meta:
 
-        return None
+    if any(
 
-    handler = tool_meta["handler"]
+        char.isdigit()
 
-    return handler(
+        for char in user_input
+    ):
 
-        tool_input,
+        cleaned = (
 
-        trace_id
-    )
+            user_input
+
+            .replace("calculate", "")
+
+            .replace("what is", "")
+
+            .strip()
+        )
+
+        return TOOL_REGISTRY[
+            "calculator"
+        ](cleaned)
+
+
+    return None

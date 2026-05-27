@@ -1,176 +1,75 @@
 import json
-import re
 
 from models.oss_model import (
-    generate_response
+    stream_response
 )
 
 
-TOOLS = """
+def create_plan(user_input):
 
-Available tools:
+    planning_prompt = [
 
-1. calculator
-Use ONLY for:
-- arithmetic
-- calculations
-- math expressions
+        {
+            "role": "system",
 
-Examples:
-- 2+2
-- 25 * 18
-- sqrt(144)
+            "content":
 
---------------------------------
+            (
+                "You are an AI planner.\n\n"
 
-2. time
-Use ONLY for:
-- current time requests
+                "Return ONLY valid JSON.\n\n"
 
-Examples:
-- what time is it
-- current time
+                "Available tools:\n"
 
-"""
+                "1. calculator\n"
+                "2. time\n\n"
+
+                "Example:\n"
+
+                '{'
+                '"tool": "calculator", '
+                '"input": "25 * 4"'
+                '}\n\n'
+
+                "If no tool needed:\n"
+
+                '{'
+                '"tool": "none", '
+                '"input": ""'
+                '}'
+            )
+        },
+
+        {
+            "role": "user",
+
+            "content": user_input
+        }
+    ]
 
 
-def plan_tool(user_input):
-
-    planner_prompt = f"""
-
-You are an AI tool planner.
-
-Your task:
-1. Decide if a tool is needed.
-2. If needed, choose the correct tool.
-3. Extract proper tool input.
-
-IMPORTANT:
-Return ONLY valid JSON.
-
-JSON format:
-
-{{
-    "use_tool": true,
-    "tool_name": "calculator",
-    "tool_input": "25 * 18"
-}}
-
-OR
-
-{{
-    "use_tool": false
-}}
-
-{TOOLS}
-
-Examples:
-
-User:
-hello
-
-Output:
-{{
-    "use_tool": false
-}}
-
---------------------------------
-
-User:
-how are you
-
-Output:
-{{
-    "use_tool": false
-}}
-
---------------------------------
-
-User:
-what is 25 * 18
-
-Output:
-{{
-    "use_tool": true,
-    "tool_name": "calculator",
-    "tool_input": "25 * 18"
-}}
-
---------------------------------
-
-User:
-what time is it
-
-Output:
-{{
-    "use_tool": true,
-    "tool_name": "time",
-    "tool_input": "current time"
-}}
-
---------------------------------
-
-User request:
-{user_input}
-
-"""
-
-    response = generate_response(
-
-        [
-
-            {
-
-                "role": "user",
-
-                "content": planner_prompt
-            }
-        ]
+    response_stream = stream_response(
+        planning_prompt
     )
 
-    print("\nPLANNER RAW OUTPUT:")
-    print(response)
+    full_response = ""
+
+    for chunk in response_stream:
+
+        full_response += chunk
+
 
     try:
 
-        match = re.search(
-
-            r"\{.*\}",
-
-            response,
-
-            re.DOTALL
+        return json.loads(
+            full_response
         )
 
-        if not match:
+    except Exception:
 
-            return None
+        return {
 
-        json_text = match.group()
+            "tool": "none",
 
-        print("\nEXTRACTED JSON:")
-        print(json_text)
-
-        plan = json.loads(
-            json_text
-        )
-
-        # ---------------------------------
-        # Explicit Tool Decision
-        # ---------------------------------
-
-        if not plan.get(
-            "use_tool",
-            False
-        ):
-
-            return None
-
-        return plan
-
-    except Exception as e:
-
-        print("\nPLANNER ERROR:")
-        print(str(e))
-
-        return None
+            "input": ""
+        }
