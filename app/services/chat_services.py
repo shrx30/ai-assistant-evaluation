@@ -2,6 +2,9 @@ import time
 import uuid
 
 from datetime import datetime
+from observability.schemas1 import (
+    LogEvent
+)
 
 from memory.memory_manager import (
     add_message,
@@ -106,26 +109,34 @@ def process_chat(user_input):
     # OBSERVABILITY LOGS
     # --------------------------------
 
-    log_data = {
+    log_event = LogEvent(
 
-        "timestamp": datetime.now().isoformat(),
+    timestamp=
+    datetime.now().isoformat(),
 
-        "trace_id": trace_id,
+    trace_id=
+    trace_id,
 
-        "latency": latency,
+    latency=
+    latency,
 
-        "input": user_input,
+    input=
+    user_input,
 
-        "response": response,
+    response=
+    response,
 
-        "unsafe": unsafe,
+    unsafe=
+    unsafe,
 
-        "plan": str(plan),
+    plan=
+    plan,
 
-        "observation": observation
-    }
+    observation=
+    observation
+  )
 
-    save_log(log_data)
+    save_log(log_event)
 
 
     # --------------------------------

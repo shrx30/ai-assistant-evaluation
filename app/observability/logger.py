@@ -1,12 +1,12 @@
 import json
 
-from datetime import datetime
+
+LOG_FILE = (
+    "app/observability_logs.jsonl"
+)
 
 
-LOG_FILE = "app/observability_logs.jsonl"
-
-
-def save_log(data):
+def save_log(log_event):
 
     with open(
 
@@ -20,8 +20,12 @@ def save_log(data):
 
         file.write(
 
-            json.dumps(data,    default=str
-)
+            json.dumps(
+
+                log_event.to_dict(),
+
+                default=str
+            )
 
             + "\n"
         )
