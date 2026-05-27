@@ -136,7 +136,7 @@ def process_chat(user_input):
     observation
   )
 
-    save_log(log_event)
+     save_log(log_event.to_dict())
 
 
     # --------------------------------

@@ -1,7 +1,8 @@
 import json
 
-from dataclasses import (
-    dataclass
+
+LOG_FILE = (
+    "app/observability_logs.jsonl"
 )
 
 
@@ -39,53 +40,36 @@ def make_serializable(obj):
             return str(obj)
 
 
-@dataclass
-class LogEvent:
+def save_log(data):
 
-    timestamp: str
+    try:
 
-    trace_id: str
+        serializable_data = (
+            make_serializable(data)
+        )
 
-    latency: float
+        with open(
 
-    input: str
+            LOG_FILE,
 
-    response: str
+            "a",
 
-    unsafe: bool
+            encoding="utf-8"
 
-    plan: object
+        ) as file:
 
-    observation: str
+            file.write(
 
+                json.dumps(
+                    serializable_data
+                )
 
-    def to_dict(self):
+                + "\n"
+            )
 
-        return {
+    except Exception as e:
 
-            "timestamp":
-            self.timestamp,
+        print(
 
-            "trace_id":
-            self.trace_id,
-
-            "latency":
-            self.latency,
-
-            "input":
-            self.input,
-
-            "response":
-            self.response,
-
-            "unsafe":
-            self.unsafe,
-
-            "plan":
-            make_serializable(
-                self.plan
-            ),
-
-            "observation":
-            self.observation
-        }
+            f"Logging Error: {str(e)}"
+        )
