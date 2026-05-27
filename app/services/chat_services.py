@@ -3,33 +3,33 @@ import uuid
 
 from datetime import datetime
 
-from core.planner import (
+from app.core.planner import (
     create_plan
 )
-from models.oss_model import (
+from app.models.oss_model import (
     stream_response
 )
-from memory.memory_manager import (
+from app.memory.memory_manager import (
     add_message,
     get_history
 )
 
-from observability.logger import (
+from app.observability.logger import (
     save_log
 )
 
-from core.config import (
+from app.core.config import (
     BLOCKED_WORDS
 )
 
-from tools.tool_router import (
+from app.tools.tool_router import (
     execute_tool
 )
 
-from core.planner import (
+from app.core.planner import (
     create_plan
 )
-from core.agent_loop import (
+from app.core.agent_loop import (
     run_agent
 )
 
