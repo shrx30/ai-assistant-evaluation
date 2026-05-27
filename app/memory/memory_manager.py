@@ -1,6 +1,6 @@
 import json
 import os
-from app.memory.memory_summarizer import (
+from memory.memory_summarizer import (
     summarize_history
 )
 

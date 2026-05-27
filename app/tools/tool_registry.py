@@ -1,8 +1,8 @@
-from app.tools.calculator_tool import (
+from tools.calculator_tool import (
     calculator_tool
 )
 
-from app.tools.time_tool import (
+from tools.time_tool import (
     time_tool
 )
 

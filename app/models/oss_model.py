@@ -2,7 +2,7 @@ import os
 
 from openai import OpenAI
 
-from app.core.config import (
+from core.config import (
     MODEL_NAME,
     TEMPERATURE,
     MAX_TOKENS
