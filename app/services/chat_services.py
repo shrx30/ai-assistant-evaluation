@@ -1,165 +1,30 @@
-import time
-import uuid
+import json
 
-from datetime import datetime
-from observability.schemas1 import (
-    LogEvent
-)
 
-from memory.memory_manager import (
-    add_message,
-    get_history
-)
-
-from observability.logger import (
-    save_log
-)
-
-from core.config import (
-    BLOCKED_WORDS
-)
-
-from core.agent_loop import (
-    run_agent
+LOG_FILE = (
+    "app/observability_logs.jsonl"
 )
 
 
-def process_chat(user_input):
+def save_log(log_event):
 
-    trace_id = str(uuid.uuid4())
+    with open(
 
-    add_message(
-        "user",
-        user_input
-    )
+        LOG_FILE,
 
-    history = get_history()
+        "a",
 
-    unsafe = any(
+        encoding="utf-8"
 
-        word in user_input.lower()
+    ) as file:
 
-        for word in BLOCKED_WORDS
-    )
+        serialized = json.dumps(
 
-    start_time = time.time()
+            log_event.to_dict(),
 
-
-    # --------------------------------
-    # GUARDRAILS
-    # --------------------------------
-
-    if unsafe:
-
-        response = (
-            "Unsafe request blocked."
+            default=lambda o: str(o)
         )
 
-        plan = {
-            "tool": "none"
-        }
-
-        observation = (
-            "Blocked by guardrails."
+        file.write(
+            serialized + "\n"
         )
-
-    else:
-
-        # ----------------------------
-        # AGENT EXECUTION
-        # ----------------------------
-
-        agent_result = run_agent(
-            user_input
-        )
-
-        plan = agent_result[
-            "plan"
-        ]
-
-        observation = agent_result[
-            "observation"
-        ]
-
-        response_stream = agent_result[
-            "response_stream"
-        ]
-
-
-        # ----------------------------
-        # CONSUME STREAM
-        # ----------------------------
-
-        response = ""
-
-        for chunk in response_stream:
-
-            response += chunk
-
-
-    end_time = time.time()
-
-    latency = round(
-        end_time - start_time,
-        2
-    )
-
-
-    # --------------------------------
-    # OBSERVABILITY LOGS
-    # --------------------------------
-
-    log_event = LogEvent(
-
-    timestamp=
-    datetime.now().isoformat(),
-
-    trace_id=
-    trace_id,
-
-    latency=
-    latency,
-
-    input=
-    user_input,
-
-    response=
-    response,
-
-    unsafe=
-    unsafe,
-
-    plan=
-    plan,
-
-    observation=
-    observation
-  )
-
-     save_log(log_event.to_dict())
-
-
-    # --------------------------------
-    # SAVE MEMORY
-    # --------------------------------
-
-    add_message(
-        "assistant",
-        response
-    )
-
-
-    # --------------------------------
-    # RETURN
-    # --------------------------------
-
-    return {
-
-        "response": response,
-
-        "latency": latency,
-
-        "trace_id": trace_id,
-
-        "unsafe": unsafe
-    }
