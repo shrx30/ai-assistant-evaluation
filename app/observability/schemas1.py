@@ -1,75 +1,51 @@
-import json
+from dataclasses import dataclass
+
+from datetime import datetime
 
 
-LOG_FILE = (
-    "app/observability_logs.jsonl"
-)
+@dataclass
+class LogEvent:
+
+    prompt: str
+
+    sanitized_prompt: str
+
+    response: str
+
+    plan: str
+
+    safe: bool
+
+    timestamp: str = (
+        datetime.utcnow().isoformat()
+    )
 
 
-def make_serializable(obj):
+    def to_dict(self):
 
-    try:
+        return {
 
-        json.dumps(obj)
+            "prompt": str(
+                self.prompt
+            ),
 
-        return obj
+            "sanitized_prompt": str(
+                self.sanitized_prompt
+            ),
 
-    except Exception:
+            "response": str(
+                self.response
+            ),
 
-        if isinstance(obj, dict):
+            "plan": str(
+                self.plan
+            ),
 
-            return {
+            "safe": bool(
+                self.safe
+            ),
 
-                str(k):
-                make_serializable(v)
-
-                for k, v in obj.items()
-            }
-
-        elif isinstance(obj, list):
-
-            return [
-
-                make_serializable(x)
-
-                for x in obj
-            ]
-
-        else:
-
-            return str(obj)
-
-
-def save_log(data):
-
-    try:
-
-        serializable_data = (
-            make_serializable(data)
-        )
-
-        with open(
-
-            LOG_FILE,
-
-            "a",
-
-            encoding="utf-8"
-
-        ) as file:
-
-            file.write(
-
-                json.dumps(
-                    serializable_data
-                )
-
-                + "\n"
+            "timestamp": str(
+                self.timestamp
             )
-
-    except Exception as e:
-
-        print(
-
-            f"Logging Error: {str(e)}"
-        )
+        }
