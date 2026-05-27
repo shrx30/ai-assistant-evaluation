@@ -6,51 +6,9 @@ LOG_FILE = (
 )
 
 
-def make_serializable(obj):
-
-    try:
-
-        json.dumps(obj)
-
-        return obj
-
-    except Exception:
-
-        if isinstance(obj, dict):
-
-            return {
-
-                str(k):
-                make_serializable(v)
-
-                for k, v in obj.items()
-            }
-
-        elif isinstance(obj, list):
-
-            return [
-
-                make_serializable(x)
-
-                for x in obj
-            ]
-
-        else:
-
-            return str(obj)
-
-
 def save_log(data):
 
     try:
-
-        serializable_data = (
-
-            make_serializable(
-
-                data.to_dict()
-            )
-        )
 
         with open(
 
@@ -65,7 +23,34 @@ def save_log(data):
             file.write(
 
                 json.dumps(
-                    serializable_data
+
+                    {
+
+                        "timestamp":
+                        str(data.timestamp),
+
+                        "trace_id":
+                        str(data.trace_id),
+
+                        "latency":
+                        float(data.latency),
+
+                        "input":
+                        str(data.input),
+
+                        "response":
+                        str(data.response),
+
+                        "unsafe":
+                        bool(data.unsafe),
+
+                        "plan":
+                        str(data.plan),
+
+                        "observation":
+                        str(data.observation)
+                    }
+
                 )
 
                 + "\n"

@@ -12,7 +12,7 @@ from observability.logger import (
     save_log
 )
 
-from observability.schemas import (
+from observability.schemas1 import (
     LogEvent
 )
 
