@@ -12,64 +12,34 @@ def create_plan(user_input):
         {
             "role": "system",
 
-            "content":
-
-            (
+            "content": (
                 "You are an AI planner.\n\n"
-
                 "Return ONLY valid JSON.\n\n"
-
                 "Available tools:\n"
-
                 "1. calculator\n"
                 "2. time\n\n"
-
                 "Example:\n"
-
-                '{'
-                '"tool": "calculator", '
-                '"input": "25 * 4"'
-                '}\n\n'
-
+                '{"tool": "calculator", "input": "25 * 4"}\n\n'
                 "If no tool needed:\n"
-
-                '{'
-                '"tool": "none", '
-                '"input": ""'
-                '}'
+                '{"tool": "none", "input": ""}'
             )
         },
 
         {
             "role": "user",
-
             "content": user_input
         }
     ]
 
-
-    response_stream = stream_response(
-        planning_prompt
-    )
-
-    full_response = ""
-
-    for chunk in response_stream:
-
-        full_response += chunk
-
+    full_response = stream_response(planning_prompt)
 
     try:
 
-        return json.loads(
-            full_response
-        )
+        return json.loads(full_response)
 
     except Exception:
 
         return {
-
             "tool": "none",
-
             "input": ""
         }
