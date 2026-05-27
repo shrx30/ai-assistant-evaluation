@@ -1,23 +1,24 @@
-import os
-
 from openai import OpenAI
 
-from core.config import (
-    MODEL_NAME,
-    TEMPERATURE,
-    MAX_TOKENS
-)
+import streamlit as st
 
 
 client = OpenAI(
 
     base_url="https://integrate.api.nvidia.com/v1",
 
-    api_key=os.getenv("NVIDIA_API_KEY")
+    api_key=st.secrets["NVIDIA_API_KEY"]
 )
 
 
-def stream_response(messages):
+MODEL_NAME = "google/gemma-2-2b-it"
+
+TEMPERATURE = 0.7
+
+MAX_TOKENS = 120
+
+
+def generate_response(messages):
 
     try:
 
@@ -33,23 +34,15 @@ def stream_response(messages):
 
             max_tokens=MAX_TOKENS,
 
-            stream=True
+            stream=False
         )
 
-        for chunk in completion:
+        response = completion.choices[
+            0
+        ].message.content
 
-            if (
-
-                chunk.choices
-
-                and chunk.choices[0].delta.content
-                is not None
-            ):
-
-                yield chunk.choices[
-                    0
-                ].delta.content
+        return response
 
     except Exception as e:
 
-        yield f"Inference Error: {str(e)}"
+        return f"Inference Error: {str(e)}"

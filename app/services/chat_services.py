@@ -1,10 +1,11 @@
 from core.planner import create_plan
 
-from models.oss_model import stream_response
+from models.oss_model import generate_response
+
 
 from observability.logger import save_log
 
-from observability.schemas import LogEvent
+from observability.schemas1 import LogEvent
 
 from guardrails.advanced_guardrails import (
     guardrail_check
@@ -71,9 +72,7 @@ def process_chat(user_input):
     # Model Response
     # ---------------------------------
 
-    response = stream_response(
-        messages
-    )
+    response = generate_response(messages)
 
     # ---------------------------------
     # FIX STREAM / GENERATOR
