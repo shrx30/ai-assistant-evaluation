@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 
 from datetime import datetime
 
-from app.logger import save_log
+from logger import save_log
 
-from app.models.oss_model import generate_response
+from models.oss_model import generate_response
 
-from app.memory import (
+from memory import (
     add_message,
     get_history
 )
