@@ -1,5 +1,5 @@
-from memory import add_message, get_context
-from prompts import build_prompt
+from app.memory import add_message, get_context
+from app.prompts import build_prompt
 from models.oss_model import generate_response
 from telemetry import tracer
 

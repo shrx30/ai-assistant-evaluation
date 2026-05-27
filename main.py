@@ -1,1 +1,1 @@
-from app.streamlit_app import *
+from main.streamlit_app import *

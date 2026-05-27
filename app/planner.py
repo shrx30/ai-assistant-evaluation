@@ -1,7 +1,7 @@
 import json
 import re
 
-from models.oss_model import (
+from app.models.oss_model import (
     generate_response
 )
 
