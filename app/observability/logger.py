@@ -6,26 +6,74 @@ LOG_FILE = (
 )
 
 
-def save_log(log_event):
+def make_serializable(obj):
 
-    with open(
+    try:
 
-        LOG_FILE,
+        json.dumps(obj)
 
-        "a",
+        return obj
 
-        encoding="utf-8"
+    except Exception:
 
-    ) as file:
+        if isinstance(obj, dict):
 
-        file.write(
+            return {
 
-            json.dumps(
+                str(k):
+                make_serializable(v)
 
-                log_event.to_dict(),
+                for k, v in obj.items()
+            }
 
-                default=str
+        elif isinstance(obj, list):
+
+            return [
+
+                make_serializable(x)
+
+                for x in obj
+            ]
+
+        else:
+
+            return str(obj)
+
+
+def save_log(data):
+
+    try:
+
+        serializable_data = (
+
+            make_serializable(
+
+                data.to_dict()
+            )
+        )
+
+        with open(
+
+            LOG_FILE,
+
+            "a",
+
+            encoding="utf-8"
+
+        ) as file:
+
+            file.write(
+
+                json.dumps(
+                    serializable_data
+                )
+
+                + "\n"
             )
 
-            + "\n"
+    except Exception as e:
+
+        print(
+
+            f"Logging Error: {str(e)}"
         )
