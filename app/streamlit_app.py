@@ -8,25 +8,13 @@ import matplotlib.pyplot as plt
 
 from datetime import datetime
 
-from logger import save_log
+from app.logger import save_log
 
-from models.oss_model import generate_response
+from app.models.oss_model import generate_response
 
-from memory import (
+from app.memory import (
     add_message,
     get_history
-)
-
-from advanced_guardrails import (
-    guardrail_check
-)
-
-from planner import (
-    plan_tool
-)
-
-from tools.tool_router import (
-    execute_tool
 )
 
 
@@ -53,9 +41,7 @@ page = st.sidebar.radio(
     "Navigation",
 
     [
-
         "Chatbot",
-
         "Observability Dashboard"
     ]
 )
@@ -69,7 +55,7 @@ if page == "Chatbot":
 
     st.title("AI Personal Assistant")
 
-    st.write("OSS Assistant Demo")
+    st.write("NVIDIA Hosted Assistant")
 
 
     # ---------------------------------
@@ -116,24 +102,9 @@ if page == "Chatbot":
 
         st.session_state.request_count += 1
 
-        # ---------------------------------
-        # Run Guardrails
-        # ---------------------------------
-
-        guardrail_result = guardrail_check(
-            user_input
-        )
-
-        safe = guardrail_result["safe"]
-
-        message = guardrail_result["reason"]
-
-        sanitized_prompt = guardrail_result[
-            "sanitized_prompt"
-        ]
 
         # ---------------------------------
-        # Add User Message To UI
+        # Show User Message
         # ---------------------------------
 
         st.session_state.messages.append({
@@ -143,132 +114,71 @@ if page == "Chatbot":
             "content": user_input
         })
 
+        with st.chat_message("user"):
+
+            st.write(user_input)
+
+
         # ---------------------------------
-        # Add Sanitized Prompt To Memory
+        # Memory History
         # ---------------------------------
 
-        if sanitized_prompt:
+        add_message(
+            "user",
+            user_input
+        )
 
-            add_message(
-                "user",
-                sanitized_prompt
+        history = get_history()
+
+
+        # ---------------------------------
+        # Lightweight Guardrails
+        # ---------------------------------
+
+        blocked_words = [
+
+            "hack",
+            "malware",
+            "bomb",
+            "explosive"
+        ]
+
+        unsafe = any(
+
+            word in user_input.lower()
+
+            for word in blocked_words
+        )
+
+
+        # ---------------------------------
+        # Response Generation
+        # ---------------------------------
+
+        start_time = time.time()
+
+        if unsafe:
+
+            response = (
+                "Unsafe request blocked."
             )
-
-        # ---------------------------------
-        # Default Tool Result
-        # ---------------------------------
-
-        tool_result = None
-
-        # ---------------------------------
-        # Unsafe Prompt
-        # ---------------------------------
-
-        if not safe:
-
-            response = message
-
-            latency = 0
-
-            history = get_history()
-
-        # ---------------------------------
-        # Safe Prompt
-        # ---------------------------------
 
         else:
 
-            history = get_history()
-
-            start_time = time.time()
-
-            # ---------------------------------
-            # Planning Layer
-            # ---------------------------------
-
-            plan = plan_tool(
-                user_input
+            response = generate_response(
+                history
             )
 
-            # ---------------------------------
-            # Tool Execution Layer
-            # ---------------------------------
+        end_time = time.time()
 
-            if plan:
+        latency = round(
+            end_time - start_time,
+            2
+        )
 
-                tool_result = execute_tool(
-
-                    plan["tool_name"],
-
-                    plan["tool_input"],
-
-                    trace_id
-                )
-
-                # ---------------------------------
-                # Structured Tool Execution
-                # ---------------------------------
-
-                if tool_result:
-
-                    # ---------------------------------
-                    # Successful Tool Execution
-                    # ---------------------------------
-
-                    if tool_result["status"] == "ok":
-
-                        tool_data = tool_result.get(
-                            "data",
-                            {}
-                        )
-
-                        response = str(tool_data)
-
-                    # ---------------------------------
-                    # Tool Failure
-                    # ---------------------------------
-
-                    else:
-
-                        error_message = tool_result.get(
-
-                            "error_message",
-
-                            "Unknown tool error."
-                        )
-
-                        response = (
-
-                            f"Tool Error: {error_message}"
-                        )
-
-                else:
-
-                    response = (
-                        "Tool execution failed."
-                    )
-
-            # ---------------------------------
-            # LLM Fallback
-            # ---------------------------------
-
-            else:
-
-                response = generate_response(
-                    history
-                )
-
-            end_time = time.time()
-
-            latency = round(
-
-                end_time - start_time,
-
-                2
-            )
 
         # ---------------------------------
-        # Observability Metrics
+        # Metrics
         # ---------------------------------
 
         input_tokens = len(
@@ -286,37 +196,8 @@ if page == "Chatbot":
             2
         )
 
-        # ---------------------------------
-        # Cost Tracing
-        # ---------------------------------
+        estimated_cost = 0
 
-        INPUT_COST_PER_1K = 0.0005
-
-        OUTPUT_COST_PER_1K = 0.001
-
-
-        estimated_cost = round(
-
-            (
-
-                (input_tokens / 1000)
-
-                * INPUT_COST_PER_1K
-
-            )
-
-            +
-
-            (
-
-                (output_tokens / 1000)
-
-                * OUTPUT_COST_PER_1K
-
-            ),
-
-            6
-        )
 
         # ---------------------------------
         # Sidebar Observability
@@ -327,15 +208,7 @@ if page == "Chatbot":
         )
 
         st.sidebar.write(
-            "Model: Qwen2.5-0.5B-Instruct"
-        )
-
-        st.sidebar.write(
             f"Trace ID: {trace_id[:8]}"
-        )
-
-        st.sidebar.write(
-            f"Conversation Length: {len(history)}"
         )
 
         st.sidebar.write(
@@ -351,65 +224,29 @@ if page == "Chatbot":
         )
 
         st.sidebar.write(
-            f"Response Length: {len(response)} chars"
-        )
-
-        st.sidebar.write(
-            f"Generation Speed: {generation_speed} chars/sec"
-        )
-
-        st.sidebar.write(
-            f"Estimated Cost: ${estimated_cost}"
+            f"Generation Speed: {generation_speed}"
         )
 
         st.sidebar.write(
             f"Requests: {st.session_state.request_count}"
         )
 
-        st.sidebar.write(
-            f"Timestamp: {datetime.now().strftime('%H:%M:%S')}"
-        )
 
-        # ---------------------------------
-        # Tool Observability Sidebar
-        # ---------------------------------
-
-        if tool_result:
-
-            st.sidebar.write(
-                f"Tool Used: {tool_result['tool_name']}"
-            )
-
-            st.sidebar.write(
-                f"Tool Status: {tool_result['status']}"
-            )
-
-            st.sidebar.write(
-                f"Tool Version: {tool_result['tool_version']}"
-            )
-
-            st.sidebar.write(
-                f"Tool Latency: {tool_result['latency_ms']} ms"
-            )
-
-        # ---------------------------------
-        # Safety Status
-        # ---------------------------------
-
-        if safe:
-
-            st.sidebar.success(
-                "NeMo + Presidio Guardrails Active"
-            )
-
-        else:
+        if unsafe:
 
             st.sidebar.error(
                 "Unsafe Prompt Blocked"
             )
 
+        else:
+
+            st.sidebar.success(
+                "Guardrails Active"
+            )
+
+
         # ---------------------------------
-        # Save Observability Logs
+        # Save Logs
         # ---------------------------------
 
         log_data = {
@@ -424,59 +261,20 @@ if page == "Chatbot":
 
             "output_tokens": output_tokens,
 
-            "conversation_length": len(history),
-
             "response_length": len(response),
 
             "generation_speed": generation_speed,
 
-            "estimated_cost": estimated_cost,
-
-            "safe_request": safe,
-
-            "request_count": st.session_state.request_count,
-
-            "user_input": user_input,
-
-            "sanitized_prompt": sanitized_prompt,
-
             "assistant_response": response,
 
-            "planner_output": plan,
-
-            # ---------------------------------
-            # Tool Telemetry
-            # ---------------------------------
-
-            "tool_status":
-
-                tool_result["status"]
-
-                if tool_result else None,
-
-            "tool_name":
-
-                tool_result["tool_name"]
-
-                if tool_result else None,
-
-            "tool_version":
-
-                tool_result["tool_version"]
-
-                if tool_result else None,
-
-            "tool_latency_ms":
-
-                tool_result["latency_ms"]
-
-                if tool_result else None
+            "unsafe_request": unsafe
         }
 
         save_log(log_data)
 
+
         # ---------------------------------
-        # Save Assistant Response
+        # Save Assistant Message
         # ---------------------------------
 
         add_message(
@@ -491,8 +289,9 @@ if page == "Chatbot":
             "content": response
         })
 
+
         # ---------------------------------
-        # Streaming Response Rendering
+        # Streaming Render
         # ---------------------------------
 
         with st.chat_message("assistant"):
@@ -507,7 +306,7 @@ if page == "Chatbot":
 
                 placeholder.markdown(full_text)
 
-                time.sleep(0.03)
+                time.sleep(0.02)
 
 
 # =================================
@@ -518,9 +317,7 @@ elif page == "Observability Dashboard":
 
     st.title("Observability Dashboard")
 
-
     LOG_FILE = "app/observability_logs.jsonl"
-
 
     logs = []
 
@@ -561,7 +358,7 @@ elif page == "Observability Dashboard":
     st.subheader("Runtime Metrics")
 
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
 
 
     col1.metric(
@@ -587,42 +384,12 @@ elif page == "Observability Dashboard":
         )
     )
 
-    col4.metric(
-
-        "Total Estimated Cost",
-
-        f"${round(df['estimated_cost'].sum(), 4)}"
-    )
-
-
-    # ---------------------------------
-    # Unsafe Requests
-    # ---------------------------------
-
-    unsafe_count = len(
-
-        df[df["safe_request"] == False]
-    )
-
-    st.metric(
-        "Unsafe Requests Blocked",
-        unsafe_count
-    )
-
-    st.metric(
-
-        "Average Cost Per Request",
-
-        f"${round(df['estimated_cost'].mean(), 6)}"
-    )
-
 
     # ---------------------------------
     # Latency Trend
     # ---------------------------------
 
     st.subheader("Latency Trend")
-
 
     fig, ax = plt.subplots()
 
@@ -632,49 +399,13 @@ elif page == "Observability Dashboard":
 
     ax.set_ylabel("Latency")
 
-
     st.pyplot(fig)
-
-
-    # ---------------------------------
-    # Output Tokens Trend
-    # ---------------------------------
-
-    st.subheader("Output Tokens Trend")
-
-
-    fig2, ax2 = plt.subplots()
-
-    ax2.plot(df["output_tokens"])
-
-    ax2.set_xlabel("Request")
-
-    ax2.set_ylabel("Output Tokens")
-
-
-    st.pyplot(fig2)
-
-
-    # ---------------------------------
-    # Download Logs
-    # ---------------------------------
-
-    st.download_button(
-
-        "Download Observability Logs",
-
-        data=df.to_csv(index=False),
-
-        file_name="observability_logs.csv",
-
-        mime="text/csv"
-    )
 
 
     # ---------------------------------
     # Raw Logs
     # ---------------------------------
 
-    st.subheader("Raw Observability Logs")
+    st.subheader("Raw Logs")
 
     st.dataframe(df)
