@@ -20,7 +20,8 @@ def save_log(data):
 
         file.write(
 
-            json.dumps(data)
+            json.dumps(data,    default=str
+)
 
             + "\n"
         )
