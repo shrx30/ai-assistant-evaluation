@@ -1,4 +1,7 @@
 from presidio_analyzer import AnalyzerEngine
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
 
 from presidio_anonymizer import (
     AnonymizerEngine
@@ -9,9 +12,19 @@ from presidio_anonymizer import (
 # Presidio Setup
 # ---------------------------------
 
-analyzer = AnalyzerEngine()
+try:
 
-anonymizer = AnonymizerEngine()
+    analyzer = AnalyzerEngine()
+
+    anonymizer = AnonymizerEngine()
+
+    PRESIDIO_AVAILABLE = True
+
+except Exception as e:
+
+    print(f"Presidio Init Error: {e}")
+
+    PRESIDIO_AVAILABLE = False
 
 
 # ---------------------------------
@@ -46,7 +59,9 @@ def guardrail_check(prompt):
 
     prompt_lower = prompt.lower()
 
-    # Keyword safety
+    # ---------------------------------
+    # Keyword Safety
+    # ---------------------------------
 
     for pattern in BLOCKED_PATTERNS:
 
@@ -61,29 +76,55 @@ def guardrail_check(prompt):
                 "sanitized_prompt": None
             }
 
-    # PII detection
+    # ---------------------------------
+    # Presidio Optional
+    # ---------------------------------
 
-    results = analyzer.analyze(
+    if not PRESIDIO_AVAILABLE:
 
-        text=prompt,
+        return {
 
-        language="en"
-    )
+            "safe": True,
 
-    sanitized = anonymizer.anonymize(
+            "reason": "Presidio unavailable.",
 
-        text=prompt,
+            "sanitized_prompt": prompt
+        }
 
-        analyzer_results=results
-    )
+    try:
 
-    sanitized_text = sanitized.text
+        results = analyzer.analyze(
 
-    return {
+            text=prompt,
 
-        "safe": True,
+            language="en"
+        )
 
-        "reason": "Prompt passed safety checks.",
+        sanitized = anonymizer.anonymize(
 
-        "sanitized_prompt": sanitized_text
-    }
+            text=prompt,
+
+            analyzer_results=results
+        )
+
+        sanitized_text = sanitized.text
+
+        return {
+
+            "safe": True,
+
+            "reason": "Prompt passed safety checks.",
+
+            "sanitized_prompt": sanitized_text
+        }
+
+    except Exception as e:
+
+        return {
+
+            "safe": True,
+
+            "reason": f"Guardrail fallback: {str(e)}",
+
+            "sanitized_prompt": prompt
+        }
