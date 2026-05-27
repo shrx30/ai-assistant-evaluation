@@ -1,163 +1,34 @@
-from core.planner import create_plan
+# ---------------------------------
+# Logging Disabled Temporarily
+# ---------------------------------
 
-from models.oss_model import (
-    generate_response
-)
+# try:
 
-from observability.logger import (
-    save_log
-)
+#     log_data = LogEvent(
 
-from observability.schemas import (
-    LogEvent
-)
+#         prompt=str(
+#             user_input
+#         ),
 
-from guardrails.advanced_guardrails import (
-    guardrail_check
-)
+#         sanitized_prompt=str(
+#             sanitized_prompt
+#         ),
 
+#         response=str(
+#             response
+#         ),
 
-def process_chat(user_input):
+#         plan=str(
+#             plan
+#         ),
 
-    # ---------------------------------
-    # Guardrails
-    # ---------------------------------
+#         safe=True
+#     )
 
-    guardrail_result = guardrail_check(
-        user_input
-    )
+#     save_log(log_data)
 
-    if not guardrail_result["safe"]:
+# except Exception as e:
 
-        return {
-
-            "response": (
-                guardrail_result[
-                    "reason"
-                ]
-            ),
-
-            "plan": None
-        }
-
-    sanitized_prompt = (
-
-        guardrail_result[
-            "sanitized_prompt"
-        ]
-    )
-
-    # ---------------------------------
-    # Planner
-    # ---------------------------------
-
-    try:
-
-        plan = create_plan(
-            sanitized_prompt
-        )
-
-        if not isinstance(
-            plan,
-            str
-        ):
-
-            plan = str(plan)
-
-    except Exception as e:
-
-        plan = (
-            f"Planner Error: {str(e)}"
-        )
-
-    # ---------------------------------
-    # Messages
-    # ---------------------------------
-
-    messages = [
-
-        {
-
-            "role": "system",
-
-            "content": (
-                "You are a helpful AI assistant."
-            )
-        },
-
-        {
-
-            "role": "user",
-
-            "content": sanitized_prompt
-        }
-    ]
-
-    # ---------------------------------
-    # Model Response
-    # ---------------------------------
-
-    try:
-
-        response = generate_response(
-            messages
-        )
-
-        if not isinstance(
-            response,
-            str
-        ):
-
-            response = str(response)
-
-    except Exception as e:
-
-        response = (
-            f"Inference Error: {str(e)}"
-        )
-
-    # ---------------------------------
-    # Logging
-    # ---------------------------------
-
-    try:
-
-        log_data = LogEvent(
-
-            prompt=str(
-                user_input
-            ),
-
-            sanitized_prompt=str(
-                sanitized_prompt
-            ),
-
-            response=str(
-                response
-            ),
-
-            plan=str(
-                plan
-            ),
-
-            safe=True
-        )
-
-        save_log(log_data)
-
-    except Exception as e:
-
-        print(
-            f"Logging Error: {str(e)}"
-        )
-
-    # ---------------------------------
-    # Return
-    # ---------------------------------
-
-    return {
-
-        "response": response,
-
-        "plan": plan
-    }
+#     print(
+#         f"Logging Error: {str(e)}"
+#     )
