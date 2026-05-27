@@ -3,12 +3,6 @@ import uuid
 
 from datetime import datetime
 
-from core.planner import (
-    create_plan
-)
-from models.oss_model import (
-    stream_response
-)
 from memory.memory_manager import (
     add_message,
     get_history
@@ -22,24 +16,14 @@ from core.config import (
     BLOCKED_WORDS
 )
 
-from tools.tool_router import (
-    execute_tool
-)
-
-from core.planner import (
-    create_plan
-)
 from core.agent_loop import (
     run_agent
 )
 
+
 def process_chat(user_input):
 
     trace_id = str(uuid.uuid4())
-
-    plan = create_plan(
-    user_input
-       )
 
     add_message(
         "user",
@@ -59,7 +43,7 @@ def process_chat(user_input):
 
 
     # --------------------------------
-    # Guardrails
+    # GUARDRAILS
     # --------------------------------
 
     if unsafe:
@@ -68,32 +52,46 @@ def process_chat(user_input):
             "Unsafe request blocked."
         )
 
+        plan = {
+            "tool": "none"
+        }
+
+        observation = (
+            "Blocked by guardrails."
+        )
+
     else:
 
         # ----------------------------
-        # Tool Execution
+        # AGENT EXECUTION
         # ----------------------------
-        plan = create_plan(
-        user_input
-          )  
-        
-
 
         agent_result = run_agent(
-    user_input
-)
+            user_input
+        )
 
         plan = agent_result[
-    "plan"
-]
+            "plan"
+        ]
 
         observation = agent_result[
-    "observation"
-]
+            "observation"
+        ]
 
-        response = agent_result[
-    "response_stream"
-]
+        response_stream = agent_result[
+            "response_stream"
+        ]
+
+
+        # ----------------------------
+        # CONSUME STREAM
+        # ----------------------------
+
+        response = ""
+
+        for chunk in response_stream:
+
+            response += chunk
 
 
     end_time = time.time()
@@ -105,7 +103,7 @@ def process_chat(user_input):
 
 
     # --------------------------------
-    # Observability Logs
+    # OBSERVABILITY LOGS
     # --------------------------------
 
     log_data = {
@@ -122,19 +120,16 @@ def process_chat(user_input):
 
         "unsafe": unsafe,
 
-        "plan": plan,
+        "plan": str(plan),
 
-
-        
-
-        "observation": observation,
+        "observation": observation
     }
 
     save_log(log_data)
 
 
     # --------------------------------
-    # Save Assistant Response
+    # SAVE MEMORY
     # --------------------------------
 
     add_message(
@@ -142,6 +137,10 @@ def process_chat(user_input):
         response
     )
 
+
+    # --------------------------------
+    # RETURN
+    # --------------------------------
 
     return {
 
