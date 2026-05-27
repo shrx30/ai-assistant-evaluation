@@ -4,19 +4,6 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
-import sys
-import os
-
-sys.path.append(
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            ".."
-        )
-    )
-)
-
 from services.chat_services import (
     process_chat
 )
@@ -98,9 +85,13 @@ if page == "Chatbot":
 
     for message in st.session_state.messages:
 
-        with st.chat_message(message["role"]):
+        with st.chat_message(
+            message["role"]
+        ):
 
-            st.write(message["content"])
+            st.write(
+                message["content"]
+            )
 
 
     # -----------------------------
@@ -139,7 +130,7 @@ if page == "Chatbot":
             user_input
         )
 
-        response_stream = result[
+        response = result[
             "response"
         ]
 
@@ -187,33 +178,25 @@ if page == "Chatbot":
 
 
         # -------------------------
-        # STREAM RESPONSE
+        # ASSISTANT RESPONSE
         # -------------------------
 
-        with st.chat_message("assistant"):
+        with st.chat_message(
+            "assistant"
+        ):
 
-            placeholder = st.empty()
-
-            full_text = ""
-
-            for chunk in response_stream:
-
-                full_text += chunk
-
-                placeholder.markdown(
-                    full_text
-                )
+            st.write(response)
 
 
         # -------------------------
-        # SAVE ASSISTANT MESSAGE
+        # SAVE SESSION HISTORY
         # -------------------------
 
         st.session_state.messages.append({
 
             "role": "assistant",
 
-            "content": full_text
+            "content": response
         })
 
 
@@ -268,7 +251,9 @@ elif page == "Observability Dashboard":
     # METRICS
     # -----------------------------
 
-    st.subheader("Runtime Metrics")
+    st.subheader(
+        "Runtime Metrics"
+    )
 
     col1, col2 = st.columns(2)
 
@@ -282,25 +267,38 @@ elif page == "Observability Dashboard":
         "Average Latency",
 
         round(
-            df["latency"].mean(),
+            df["latency"].astype(
+                float
+            ).mean(),
             2
         )
     )
 
 
     # -----------------------------
-    # LATENCY CHART
+    # LATENCY TREND
     # -----------------------------
 
-    st.subheader("Latency Trend")
+    st.subheader(
+        "Latency Trend"
+    )
 
     fig, ax = plt.subplots()
 
-    ax.plot(df["latency"])
+    ax.plot(
 
-    ax.set_xlabel("Request")
+        df["latency"].astype(
+            float
+        )
+    )
 
-    ax.set_ylabel("Latency")
+    ax.set_xlabel(
+        "Request"
+    )
+
+    ax.set_ylabel(
+        "Latency"
+    )
 
     st.pyplot(fig)
 

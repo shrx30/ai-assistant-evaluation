@@ -1,132 +1,154 @@
-from core.planner import create_plan
+import time
+import uuid
 
-from models.oss_model import generate_response
+from datetime import datetime
 
+from memory.memory_manager import (
+    add_message,
+    get_history
+)
 
-from observability.logger import save_log
+from observability.logger import (
+    save_log
+)
 
-from observability.schemas1 import LogEvent
+from observability.schemas import (
+    LogEvent
+)
 
-from guardrails.advanced_guardrails import (
-    guardrail_check
+from core.config import (
+    BLOCKED_WORDS
+)
+
+from core.agent_loop import (
+    run_agent
 )
 
 
 def process_chat(user_input):
 
-    # ---------------------------------
-    # Guardrails
-    # ---------------------------------
+    trace_id = str(uuid.uuid4())
 
-    guardrail_result = guardrail_check(
+    add_message(
+        "user",
         user_input
     )
 
-    if not guardrail_result["safe"]:
+    history = get_history()
 
-        return {
+    unsafe = any(
 
-            "response": (
-                guardrail_result["reason"]
-            ),
+        word in user_input.lower()
 
-            "plan": None
-        }
+        for word in BLOCKED_WORDS
+    )
 
-    sanitized_prompt = (
-        guardrail_result[
-            "sanitized_prompt"
+    start_time = time.time()
+
+
+    # --------------------------------
+    # GUARDRAILS
+    # --------------------------------
+
+    if unsafe:
+
+        response = (
+            "Unsafe request blocked."
+        )
+
+        plan = "none"
+
+        observation = (
+            "Blocked by guardrails."
+        )
+
+    else:
+
+        # ----------------------------
+        # AGENT EXECUTION
+        # ----------------------------
+
+        agent_result = run_agent(
+            user_input
+        )
+
+        plan = str(
+
+            agent_result["plan"]
+        )
+
+        observation = agent_result[
+            "observation"
         ]
+
+        response = agent_result[
+            "response"
+        ]
+
+
+    end_time = time.time()
+
+    latency = round(
+        end_time - start_time,
+        2
     )
 
-    # ---------------------------------
-    # Planner
-    # ---------------------------------
 
-    plan = create_plan(
-        sanitized_prompt
+    # --------------------------------
+    # OBSERVABILITY
+    # --------------------------------
+
+    log_event = LogEvent(
+
+        timestamp=
+        datetime.now().isoformat(),
+
+        trace_id=
+        trace_id,
+
+        latency=
+        latency,
+
+        input=
+        user_input,
+
+        response=
+        response,
+
+        unsafe=
+        unsafe,
+
+        plan=
+        plan,
+
+        observation=
+        observation
     )
 
-    # ---------------------------------
-    # Messages
-    # ---------------------------------
+    save_log(log_event)
 
-    messages = [
 
-        {
-            "role": "system",
+    # --------------------------------
+    # SAVE MEMORY
+    # --------------------------------
 
-            "content": (
-                "You are a helpful AI assistant."
-            )
-        },
+    add_message(
+        "assistant",
+        response
+    )
 
-        {
-            "role": "user",
 
-            "content": sanitized_prompt
-        }
-    ]
-
-    # ---------------------------------
-    # Model Response
-    # ---------------------------------
-
-    response = generate_response(messages)
-
-    # ---------------------------------
-    # FIX STREAM / GENERATOR
-    # ---------------------------------
-
-    if not isinstance(response, str):
-
-        try:
-
-            response = "".join(
-
-                chunk for chunk in response
-            )
-
-        except Exception:
-
-            response = str(response)
-
-    # ---------------------------------
-    # Logging
-    # ---------------------------------
-
-    try:
-
-        log_data = LogEvent(
-
-            prompt=str(user_input),
-
-            sanitized_prompt=str(
-                sanitized_prompt
-            ),
-
-            response=str(response),
-
-            plan=str(plan),
-
-            safe=True
-        )
-
-        save_log(log_data)
-
-    except Exception as e:
-
-        print(
-            f"Logging Error: {e}"
-        )
-
-    # ---------------------------------
-    # Return
-    # ---------------------------------
+    # --------------------------------
+    # RETURN
+    # --------------------------------
 
     return {
 
         "response": response,
 
-        "plan": plan
+        "latency": latency,
+
+        "trace_id": trace_id,
+
+        "unsafe": unsafe
     }

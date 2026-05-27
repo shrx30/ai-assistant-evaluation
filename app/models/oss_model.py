@@ -1,21 +1,20 @@
+import os
+
 from openai import OpenAI
 
-import streamlit as st
+from core.config import (
+    MODEL_NAME,
+    TEMPERATURE,
+    MAX_TOKENS
+)
 
 
 client = OpenAI(
 
     base_url="https://integrate.api.nvidia.com/v1",
 
-    api_key=st.secrets["NVIDIA_API_KEY"]
+    api_key=os.getenv("NVIDIA_API_KEY")
 )
-
-
-MODEL_NAME = "google/gemma-2-2b-it"
-
-TEMPERATURE = 0.7
-
-MAX_TOKENS = 120
 
 
 def generate_response(messages):

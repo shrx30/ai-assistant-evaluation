@@ -7,7 +7,7 @@ from tools.tool_registry import (
 )
 
 from models.oss_model import (
-    stream_response
+    generate_response
 )
 
 
@@ -28,9 +28,9 @@ def run_agent(user_input):
     )
 
 
-    # -----------------------------
+    # --------------------------------
     # TOOL EXECUTION
-    # -----------------------------
+    # --------------------------------
 
     if (
 
@@ -57,9 +57,9 @@ def run_agent(user_input):
         )
 
 
-    # -----------------------------
+    # --------------------------------
     # FINAL RESPONSE
-    # -----------------------------
+    # --------------------------------
 
     final_prompt = [
 
@@ -92,7 +92,7 @@ def run_agent(user_input):
     ]
 
 
-    response_stream = stream_response(
+    response = generate_response(
         final_prompt
     )
 
@@ -102,5 +102,5 @@ def run_agent(user_input):
 
         "observation": observation,
 
-        "response_stream": response_stream
+        "response": response
     }
