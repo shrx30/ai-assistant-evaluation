@@ -1,19 +1,11 @@
 import streamlit as st
 import json
 
-import pandas as pd
-import matplotlib.pyplot as plt
-
-from services.chat_services import (
-    process_chat
-)
-
-from memory.memory_manager import (
-    clear_memory
-)
-
 import sys
 import os
+
+import pandas as pd
+import matplotlib.pyplot as plt
 
 sys.path.append(
 
@@ -27,6 +19,19 @@ sys.path.append(
         )
     )
 )
+
+from services.chat_services import (
+    process_chat
+)
+
+from memory.memory_manager import (
+    clear_memory
+)
+
+import sys
+import os
+
+
 
 
 
