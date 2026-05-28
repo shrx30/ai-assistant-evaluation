@@ -1,7 +1,7 @@
 import json
 
 from models.oss_model import (
-    stream_response
+    generate_response
 )
 
 
@@ -31,7 +31,7 @@ def create_plan(user_input):
         }
     ]
 
-    full_response = stream_response(planning_prompt)
+    full_response = generate_response(planning_prompt)
 
     try:
 
