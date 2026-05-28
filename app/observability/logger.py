@@ -6,59 +6,34 @@ LOG_FILE = (
 )
 
 
-def save_log(data):
+def save_log(log_event):
 
     try:
 
-        with open(
+        serialized = json.dumps(
 
-            LOG_FILE,
+            log_event.to_dict(),
 
-            "a",
-
-            encoding="utf-8"
-
-        ) as file:
-
-            file.write(
-
-                json.dumps(
-
-                    {
-
-                        "timestamp":
-                        str(data.timestamp),
-
-                        "trace_id":
-                        str(data.trace_id),
-
-                        "latency":
-                        float(data.latency),
-
-                        "input":
-                        str(data.input),
-
-                        "response":
-                        str(data.response),
-
-                        "unsafe":
-                        bool(data.unsafe),
-
-                        "plan":
-                        str(data.plan),
-
-                        "observation":
-                        str(data.observation)
-                    }
-
-                )
-
-                + "\n"
-            )
+            default=lambda o: str(o)
+        )
 
     except Exception as e:
 
-        print(
+        serialized = json.dumps({
 
-            f"Logging Error: {str(e)}"
+            "logging_error": str(e)
+        })
+
+    with open(
+
+        LOG_FILE,
+
+        "a",
+
+        encoding="utf-8"
+
+    ) as file:
+
+        file.write(
+            serialized + "\n"
         )
