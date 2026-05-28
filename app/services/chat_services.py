@@ -1,18 +1,18 @@
-from app.core.planner import create_plan
+from core.planner import create_plan
 
-from app.models.oss_model import (
+from models.oss_model import (
     generate_response
 )
 
-from app.guardrails.advanced_guardrails import (
+from guardrails.advanced_guardrails import (
     guardrail_check
 )
 
-from app.observability.logger import (
+from observability.logger import (
     save_log
 )
 
-from app.observability.schemas1 import (
+from observability.schemas1 import (
     LogEvent
 )
 
