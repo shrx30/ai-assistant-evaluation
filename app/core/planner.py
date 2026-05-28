@@ -1,6 +1,6 @@
 import json
 
-from app.models.oss_model import (
+from models.oss_model import (
     stream_response
 )
 

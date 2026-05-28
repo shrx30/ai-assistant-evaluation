@@ -1,4 +1,4 @@
-from app.tools.tool_registry import (
+from tools.tool_registry import (
     TOOL_REGISTRY
 )
 
