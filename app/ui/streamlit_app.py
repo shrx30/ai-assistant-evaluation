@@ -4,11 +4,11 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from services.chat_services import (
+from app.services.chat_services import (
     process_chat
 )
 
-from memory.memory_manager import (
+from app.memory.memory_manager import (
     clear_memory
 )
 
