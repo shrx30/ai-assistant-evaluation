@@ -1,48 +1,233 @@
 import json
 import os
 
+import pandas as pd
+import streamlit as st
+import matplotlib.pyplot as plt
+
 
 LOG_FILE = (
     "app/observability/observability_logs.jsonl"
 )
 
 
-def save_log(data):
+st.set_page_config(
 
-    try:
+    page_title="Observability Dashboard",
 
-        os.makedirs(
-            os.path.dirname(LOG_FILE),
-            exist_ok=True
-        )
+    page_icon="📊",
+
+    layout="wide"
+)
 
 
-        print("LOG FILE:", LOG_FILE)
-        print("LOG DATA:", data)
+st.title(
+    "AI Assistant Observability Dashboard"
+)
 
-        with open(
 
-            LOG_FILE,
+# ---------------------------------
+# Load Logs
+# ---------------------------------
 
-            "a",
+if not os.path.exists(
+    LOG_FILE
+):
 
-            encoding="utf-8"
+    st.error(
+        "No observability logs found."
+    )
 
-        ) as file:
+    st.stop()
 
-            file.write(
 
-                json.dumps(
-                    data,
-                    default=str
+logs = []
+
+try:
+
+    with open(
+
+        LOG_FILE,
+
+        "r",
+
+        encoding="utf-8"
+
+    ) as file:
+
+        for line in file:
+
+            if line.strip():
+
+                logs.append(
+                    json.loads(line)
                 )
 
-                + "\n"
-            )
+except Exception as e:
 
-    except Exception as e:
+    st.error(
+        f"Error loading logs: {str(e)}"
+    )
 
-        print(
+    st.stop()
 
-            f"Logging Error: {str(e)}"
-        )
+
+if len(logs) == 0:
+
+    st.warning(
+        "Log file exists but contains no entries."
+    )
+
+    st.stop()
+
+
+df = pd.DataFrame(logs)
+
+
+# ---------------------------------
+# Debug Info
+# ---------------------------------
+
+st.subheader(
+    "Debug Information"
+)
+
+st.write(
+    "Available Columns:"
+)
+
+st.write(
+    list(df.columns)
+)
+
+st.write(
+    df.head()
+)
+
+
+# ---------------------------------
+# Metrics
+# ---------------------------------
+
+st.subheader(
+    "Runtime Metrics"
+)
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric(
+
+    "Total Requests",
+
+    len(df)
+)
+
+col2.metric(
+
+    "Average Latency",
+
+    round(
+
+        df["latency"].mean(),
+
+        2
+
+    )
+
+    if "latency" in df.columns
+
+    else 0
+)
+
+col3.metric(
+
+    "Average Response Length",
+
+    round(
+
+        df["response"]
+
+        .astype(str)
+
+        .str.len()
+
+        .mean(),
+
+        2
+
+    )
+
+    if "response" in df.columns
+
+    else 0
+)
+
+
+# ---------------------------------
+# Unsafe Requests
+# ---------------------------------
+
+if "unsafe" in df.columns:
+
+    unsafe_count = len(
+
+        df[
+
+            df["unsafe"]
+
+            == True
+        ]
+    )
+
+else:
+
+    unsafe_count = 0
+
+
+st.metric(
+
+    "Unsafe Requests",
+
+    unsafe_count
+)
+
+
+# ---------------------------------
+# Latency Chart
+# ---------------------------------
+
+if "latency" in df.columns:
+
+    st.subheader(
+        "Latency Trend"
+    )
+
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        df["latency"]
+    )
+
+    ax.set_xlabel(
+        "Request"
+    )
+
+    ax.set_ylabel(
+        "Latency"
+    )
+
+    st.pyplot(fig)
+
+
+# ---------------------------------
+# Raw Logs
+# ---------------------------------
+
+st.subheader(
+    "Raw Observability Logs"
+)
+
+st.dataframe(
+    df,
+    use_container_width=True
+)
