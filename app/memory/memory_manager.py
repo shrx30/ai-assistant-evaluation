@@ -31,6 +31,11 @@ def load_memory():
 
 def save_memory(history):
 
+    os.makedirs(
+        os.path.dirname(MEMORY_FILE),
+        exist_ok=True
+    )
+
     with open(
         MEMORY_FILE,
         "w",
@@ -44,7 +49,10 @@ def save_memory(history):
         )
 
 
-def add_message(role, content):
+def add_message(
+    role,
+    content
+):
 
     history = load_memory()
 
@@ -55,11 +63,11 @@ def add_message(role, content):
         "content": content
     })
 
-    # keep only latest 20 messages
-
     history = history[-20:]
 
-    save_memory(history)
+    save_memory(
+        history
+    )
 
 
 def get_history():
