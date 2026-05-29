@@ -5,7 +5,6 @@ from datetime import datetime
 
 from core.agent_loop import run_agent
 
-from observability.schemas import LogEvent
 from observability.logger import save_log
 
 
@@ -28,6 +27,10 @@ def process_chat(user_input):
         2
     )
 
+    print(
+        "BEFORE SAVE_LOG"
+    )
+
     save_log({
 
         "timestamp":
@@ -45,6 +48,10 @@ def process_chat(user_input):
         "response":
         response
     })
+
+    print(
+        "AFTER SAVE_LOG"
+    )
 
     return {
 
