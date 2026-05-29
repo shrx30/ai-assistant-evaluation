@@ -7,8 +7,6 @@ from core.agent_loop import run_agent
 
 from observability.logger import save_log
 
-from observability.schemas import LogEvent
-
 
 def process_chat(user_input):
 
@@ -29,44 +27,35 @@ def process_chat(user_input):
         2
     )
 
-    log_event = LogEvent(
+    save_log({
 
-        timestamp=
+        "timestamp":
         datetime.now().isoformat(),
 
-        trace_id=
+        "trace_id":
         trace_id,
 
-        latency=
+        "latency":
         latency,
 
-        input=
+        "input":
         user_input,
 
-        response=
-        response,
-
-        unsafe=
-        False,
-
-        plan=
-        "disabled",
-
-        observation=
-        "disabled"
-    )
-
-    save_log(
-        log_event
-    )
+        "response":
+        response
+    })
 
     return {
 
-        "response": response,
+        "response":
+        response,
 
-        "latency": latency,
+        "latency":
+        latency,
 
-        "trace_id": trace_id,
+        "trace_id":
+        trace_id,
 
-        "unsafe": False
+        "unsafe":
+        False
     }
