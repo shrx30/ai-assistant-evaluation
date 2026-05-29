@@ -27,31 +27,17 @@ def process_chat(user_input):
         2
     )
 
-    print(
-        "BEFORE SAVE_LOG"
-    )
+   print("BEFORE SAVE_LOG")
 
-    save_log({
+save_log({
+    "timestamp": datetime.now().isoformat(),
+    "trace_id": trace_id,
+    "latency": latency,
+    "input": user_input,
+    "response": response
+})
 
-        "timestamp":
-        datetime.now().isoformat(),
-
-        "trace_id":
-        trace_id,
-
-        "latency":
-        latency,
-
-        "input":
-        user_input,
-
-        "response":
-        response
-    })
-
-    print(
-        "AFTER SAVE_LOG"
-    )
+print("AFTER SAVE_LOG")
 
     return {
 
