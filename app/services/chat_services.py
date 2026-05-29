@@ -5,7 +5,7 @@ from datetime import datetime
 
 from core.agent_loop import run_agent
 
-from observability.logger import save_log
+from observability.schemas import LogEvent
 
 
 def process_chat(user_input):
