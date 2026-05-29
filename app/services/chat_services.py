@@ -29,7 +29,7 @@ def process_chat(user_input):
 
    print("BEFORE SAVE_LOG")
 
-save_log({
+save_log( {
     "timestamp": datetime.now().isoformat(),
     "trace_id": trace_id,
     "latency": latency,
@@ -37,7 +37,7 @@ save_log({
     "response": response
 })
 
-print("AFTER SAVE_LOG")
+    print("AFTER SAVE_LOG")
 
     return {
 
