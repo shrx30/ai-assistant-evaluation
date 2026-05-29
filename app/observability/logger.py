@@ -1,50 +1,13 @@
 import json
-
-
-
-
 import os
-
-st.sidebar.write(
-    "Log Exists:",
-    os.path.exists(
-        "app/observability/observability_logs.jsonl"
-    )
-)
-
-
-
-
-if os.path.exists(
-    "app/observability/observability_logs.jsonl"
-):
-    st.sidebar.write(
-        "Log Size:",
-        os.path.getsize(
-            "app/observability/observability_logs.jsonl"
-        )
-    )
-
-
-print("CHAT_SERVICES LOADED")
-
 
 LOG_FILE = (
     "app/observability/observability_logs.jsonl"
 )
 
-
 def save_log(data):
 
     try:
-
-        print(
-            "SAVE_LOG CALLED"
-        )
-
-        print(
-            data
-        )
 
         os.makedirs(
             os.path.dirname(LOG_FILE),
@@ -58,23 +21,14 @@ def save_log(data):
         ) as file:
 
             file.write(
-
                 json.dumps(
                     data,
                     default=str
-                )
-
-                + "\n"
+                ) + "\n"
             )
-
-        print(
-            "LOG WRITTEN TO:",
-            LOG_FILE
-        )
 
     except Exception as e:
 
         print(
-            "LOGGING ERROR:",
-            str(e)
+            f"LOGGING ERROR: {str(e)}"
         )
