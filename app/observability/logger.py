@@ -1,15 +1,16 @@
 import json
 import os
 
-
 LOG_FILE = (
     "app/observability/observability_logs.jsonl"
 )
 
-
 def save_log(data):
 
     try:
+
+        print("SAVE_LOG CALLED")
+        print(data)
 
         os.makedirs(
             os.path.dirname(LOG_FILE),
@@ -29,8 +30,14 @@ def save_log(data):
                 ) + "\n"
             )
 
+        print(
+            "LOG WRITTEN TO:",
+            LOG_FILE
+        )
+
     except Exception as e:
 
         print(
-            f"Logging Error: {str(e)}"
+            "LOGGING ERROR:",
+            str(e)
         )
