@@ -74,3 +74,28 @@ def add_message(role, content):
 
 
 # =========================
+# =================================
+# GET HISTORY
+# =================================
+
+def get_history():
+    history = load_memory()
+    summary = load_summary()
+
+    if summary:
+        return [
+            {
+                "role": "system",
+                "content": "Conversation summary: " + summary
+            }
+        ] + history
+
+    return history
+
+
+# =================================
+# CLEAR MEMORY
+# =================================
+
+def clear_memory():
+    save_memory([])
