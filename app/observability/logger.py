@@ -1,5 +1,29 @@
 import json
+
+
+
+
 import os
+
+st.sidebar.write(
+    "Log Exists:",
+    os.path.exists(
+        "app/observability/observability_logs.jsonl"
+    )
+)
+
+
+
+
+if os.path.exists(
+    "app/observability/observability_logs.jsonl"
+):
+    st.sidebar.write(
+        "Log Size:",
+        os.path.getsize(
+            "app/observability/observability_logs.jsonl"
+        )
+    )
 
 
 print("CHAT_SERVICES LOADED")
