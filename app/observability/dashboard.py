@@ -4,6 +4,16 @@ import streamlit as st
 import matplotlib.pyplot as plt
 
 
+import os
+
+st.write(
+    "File Exists:",
+    os.path.exists(
+        "app/observability/observability_logs.jsonl"
+    )
+)
+
+
 LOG_FILE = (
     "app/observability/observability_logs.jsonl"
 )
