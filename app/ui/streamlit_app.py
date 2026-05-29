@@ -225,6 +225,9 @@ if page == "Chatbot":
 # =================================
 # OBSERVABILITY DASHBOARD
 # =================================
+# =================================
+# OBSERVABILITY DASHBOARD
+# =================================
 
 elif page == "Observability Dashboard":
 
@@ -233,11 +236,22 @@ elif page == "Observability Dashboard":
     )
 
     LOG_FILE = (
-        "app/observability_logs.jsonl"
+        "app/observability/observability_logs.jsonl"
     )
 
-    logs = []
+    st.write(
+        "File Exists:",
+        os.path.exists(LOG_FILE)
+    )
 
+    if os.path.exists(LOG_FILE):
+
+        st.write(
+            "Log Size:",
+            os.path.getsize(LOG_FILE)
+        )
+
+    logs = []
 
     try:
 
@@ -253,9 +267,11 @@ elif page == "Observability Dashboard":
 
             for line in file:
 
-                logs.append(
-                    json.loads(line)
-                )
+                if line.strip():
+
+                    logs.append(
+                        json.loads(line)
+                    )
 
     except FileNotFoundError:
 
@@ -265,8 +281,67 @@ elif page == "Observability Dashboard":
 
         st.stop()
 
+    if len(logs) == 0:
+
+        st.warning(
+            "Log file exists but contains no entries."
+        )
+
+        st.stop()
 
     df = pd.DataFrame(logs)
+
+    st.subheader(
+        "Runtime Metrics"
+    )
+
+    col1, col2 = st.columns(2)
+
+    col1.metric(
+        "Total Requests",
+        len(df)
+    )
+
+    col2.metric(
+        "Average Latency",
+        round(
+            df["latency"]
+            .astype(float)
+            .mean(),
+            2
+        )
+    )
+
+    st.subheader(
+        "Latency Trend"
+    )
+
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        df["latency"]
+        .astype(float)
+    )
+
+    ax.set_xlabel(
+        "Request"
+    )
+
+    ax.set_ylabel(
+        "Latency"
+    )
+
+    st.pyplot(fig)
+
+    st.subheader(
+        "Raw Logs"
+    )
+
+    st.dataframe(
+        df,
+        use_container_width=True
+    )
+
 
 
     # -----------------------------
