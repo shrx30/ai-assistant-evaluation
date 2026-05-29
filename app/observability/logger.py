@@ -27,6 +27,8 @@ def save_log(data):
                 ) + "\n"
             )
 
+        print("LOG SAVED")
+
     except Exception as e:
 
         print(
