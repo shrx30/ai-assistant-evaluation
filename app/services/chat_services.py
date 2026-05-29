@@ -48,7 +48,7 @@ def process_chat(user_input):
 
     messages = [
         {
-            "role": "system",
+            "role": "user",
             "content": "You are a helpful AI assistant."
         },
         {

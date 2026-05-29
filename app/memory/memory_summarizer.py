@@ -7,7 +7,7 @@ def summarize_history(history):
     prompt = [
 
         {
-            "role": "system",
+            "role": "user",
 
             "content":
 

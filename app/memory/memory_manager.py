@@ -165,7 +165,7 @@ def get_history():
         return [
 
             {
-                "role": "system",
+                "role": "user",
 
                 "content":
 
