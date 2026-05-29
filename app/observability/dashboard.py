@@ -1,51 +1,41 @@
 import json
-
 import pandas as pd
-
 import streamlit as st
-
 import matplotlib.pyplot as plt
 
 
-LOG_FILE = "app/observability/observability_logs.jsonl"
-
-
-st.set_page_config(
-
-    page_title="Observability Dashboard",
-
-    page_icon="📊",
-
-    layout="wide"
+LOG_FILE = (
+    "app/observability/observability_logs.jsonl"
 )
 
 
-st.title("AI Assistant Observability Dashboard")
+st.set_page_config(
+    page_title="Observability Dashboard",
+    page_icon="📊",
+    layout="wide"
+)
 
-
-# ---------------------------------
-# Load Logs
-# ---------------------------------
+st.title(
+    "AI Assistant Observability Dashboard"
+)
 
 logs = []
 
 try:
 
     with open(
-
         LOG_FILE,
-
         "r",
-
         encoding="utf-8"
-
     ) as file:
 
         for line in file:
 
-            logs.append(
-                json.loads(line)
-            )
+            if line.strip():
+
+                logs.append(
+                    json.loads(line)
+                )
 
 except FileNotFoundError:
 
@@ -56,18 +46,23 @@ except FileNotFoundError:
     st.stop()
 
 
+if len(logs) == 0:
+
+    st.warning(
+        "No log entries yet."
+    )
+
+    st.stop()
+
+
 df = pd.DataFrame(logs)
 
 
-# ---------------------------------
-# Metrics
-# ---------------------------------
-
-st.subheader("Runtime Metrics")
-
+st.subheader(
+    "Runtime Metrics"
+)
 
 col1, col2, col3 = st.columns(3)
-
 
 col1.metric(
     "Total Requests",
@@ -76,80 +71,51 @@ col1.metric(
 
 col2.metric(
     "Average Latency",
-
     round(
-        df["latency"].mean(),
+        df["latency"].astype(float).mean(),
         2
     )
 )
 
 col3.metric(
-    "Average Output Tokens",
-
+    "Average Response Length",
     round(
-        df["output_tokens"].mean(),
+        df["response"]
+        .astype(str)
+        .str.len()
+        .mean(),
         2
     )
 )
 
 
-# ---------------------------------
-# Unsafe Requests
-# ---------------------------------
-
-unsafe_count = len(
-
-    df[df["safe_request"] == False]
+st.subheader(
+    "Latency Trend"
 )
-
-st.metric(
-    "Unsafe Requests Blocked",
-    unsafe_count
-)
-
-
-# ---------------------------------
-# Latency Chart
-# ---------------------------------
-
-st.subheader("Latency Trend")
-
 
 fig, ax = plt.subplots()
 
-ax.plot(df["latency"])
+ax.plot(
+    df["latency"]
+    .astype(float)
+)
 
-ax.set_xlabel("Request")
+ax.set_xlabel(
+    "Request"
+)
 
-ax.set_ylabel("Latency")
-
+ax.set_ylabel(
+    "Latency"
+)
 
 st.pyplot(fig)
 
 
-# ---------------------------------
-# Token Usage Chart
-# ---------------------------------
+st.subheader(
+    "Raw Logs"
+)
 
-st.subheader("Output Token Trend")
-
-
-fig2, ax2 = plt.subplots()
-
-ax2.plot(df["output_tokens"])
-
-ax2.set_xlabel("Request")
-
-ax2.set_ylabel("Output Tokens")
-
-
-st.pyplot(fig2)
-
-
-# ---------------------------------
-# Raw Logs
-# ---------------------------------
-
-st.subheader("Raw Observability Logs")
-
-st.dataframe(df)
+st.dataframe(
+    df,
+    use_container_width=True
+)
