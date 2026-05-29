@@ -10,7 +10,7 @@ def create_plan(user_input):
     planning_prompt = [
 
         {
-            "role": "system",
+            "role": "user",
 
             "content": (
                 "You are an AI planner.\n\n"

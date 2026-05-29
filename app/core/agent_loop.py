@@ -63,33 +63,24 @@ def run_agent(user_input):
 
     final_prompt = [
 
-        {
-            "role": "system",
+    {
+        "role": "user",
 
-            "content":
+        "content":
 
-            (
-                "You are an AI agent.\n"
+        (
+            "You are an AI agent.\n\n"
 
-                "Use observations carefully "
-                "to answer the user."
-            )
-        },
+            "Use observations carefully.\n\n"
 
-        {
-            "role": "user",
+            f"User Input:\n{user_input}\n\n"
 
-            "content":
+            f"Plan:\n{plan}\n\n"
 
-            (
-                f"User Input:\n{user_input}\n\n"
-
-                f"Plan:\n{plan}\n\n"
-
-                f"Observation:\n{observation}"
-            )
-        }
-    ]
+            f"Observation:\n{observation}"
+        )
+    }
+]
 
 
     response = generate_response(

@@ -27,7 +27,7 @@ def summarize_history(history):
 
     summary = ""
 
-    response_stream = stream_response(
+    response_stream = generate_response(
         prompt
     )
 
