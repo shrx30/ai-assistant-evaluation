@@ -2,6 +2,9 @@ import json
 import os
 
 
+print("CHAT_SERVICES LOADED")
+
+
 LOG_FILE = (
     "app/observability/observability_logs.jsonl"
 )
