@@ -16,6 +16,10 @@ def save_log(data):
             exist_ok=True
         )
 
+
+        print("LOG FILE:", LOG_FILE)
+        print("LOG DATA:", data)
+
         with open(
 
             LOG_FILE,
