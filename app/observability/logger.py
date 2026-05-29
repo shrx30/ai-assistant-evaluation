@@ -1,39 +1,44 @@
 import json
+import os
 
 
 LOG_FILE = (
-    "app/observability_logs.jsonl"
+    "app/observability/observability_logs.jsonl"
 )
 
 
-def save_log(log_event):
+def save_log(data):
 
     try:
 
-        serialized = json.dumps(
-
-            log_event.to_dict(),
-
-            default=lambda o: str(o)
+        os.makedirs(
+            os.path.dirname(LOG_FILE),
+            exist_ok=True
         )
+
+        with open(
+
+            LOG_FILE,
+
+            "a",
+
+            encoding="utf-8"
+
+        ) as file:
+
+            file.write(
+
+                json.dumps(
+                    data,
+                    default=str
+                )
+
+                + "\n"
+            )
 
     except Exception as e:
 
-        serialized = json.dumps({
+        print(
 
-            "logging_error": str(e)
-        })
-
-    with open(
-
-        LOG_FILE,
-
-        "a",
-
-        encoding="utf-8"
-
-    ) as file:
-
-        file.write(
-            serialized + "\n"
+            f"Logging Error: {str(e)}"
         )
