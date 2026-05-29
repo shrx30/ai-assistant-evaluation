@@ -26,6 +26,8 @@ def generate_response(messages):
 
         print("MESSAGES SENT TO MODEL:")
         print(messages)
+        for m in messages:
+         print(m)
 
         completion = client.chat.completions.create(
 
