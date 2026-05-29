@@ -1,6 +1,5 @@
-from models.oss_model import (
-    stream_response
-)
+from models.oss_model import generate_response
+
 
 
 def summarize_history(history):
