@@ -411,12 +411,12 @@ elif page == "Observability Dashboard":
     st.dataframe(df)
 
 
-
+ 
     # =================================
 # MEMORY VIEWER
 # =================================
 
-    elif page == "Memory Viewer":
+elif page == "Memory Viewer":
 
      st.title(
         "Memory Viewer"
@@ -428,6 +428,6 @@ elif page == "Observability Dashboard":
         f"Messages Stored: {len(memory)}"
       )
 
-       st.json(
+     st.json(
         memory
     )
