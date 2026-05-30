@@ -25,7 +25,7 @@ from services.chat_services import (
 )
 
 from memory.memory_manager import (
-    clear_memory
+    clear_memory,get_history
 )
 
 import sys
@@ -59,7 +59,9 @@ page = st.sidebar.radio(
 
     [
         "Chatbot",
-        "Observability Dashboard"
+        "Observability Dashboard",
+        "Memory Viewer"
+        
     ]
 )
 
@@ -407,3 +409,25 @@ elif page == "Observability Dashboard":
     st.subheader("Raw Logs")
 
     st.dataframe(df)
+
+
+
+    # =================================
+# MEMORY VIEWER
+# =================================
+
+    elif page == "Memory Viewer":
+
+     st.title(
+        "Memory Viewer"
+     )
+
+     memory = get_history()
+
+     st.write(
+        f"Messages Stored: {len(memory)}"
+      )
+
+       st.json(
+        memory
+    )
