@@ -10,7 +10,7 @@ from core.planner import (
     create_plan
 )
 
-from tools.tool_router import (
+from core.tool_router import (
     route_tool
 )
 
@@ -23,6 +23,11 @@ def run_agent(user_input):
 
     tool_result = route_tool(
         user_input
+    )
+
+    print(
+        "TOOL USED:",
+        tool_result
     )
 
     if tool_result["tool"] == "calculator":
