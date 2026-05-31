@@ -1,40 +1,90 @@
-import re
+from models.oss_model import (
+    generate_response
+)
 
-from tools.calculator import (
-    calculate
+from memory.memory_manager import (
+    get_history
+)
+
+from core.planner import (
+    create_plan
+)
+
+from core.tool_router import (
+    route_tool
 )
 
 
-def route_tool(user_input):
+def run_agent(user_input):
 
-    expression = re.sub(
-        r"[^0-9+\-*/(). ]",
-        "",
+    # -------------------------
+    # CREATE PLAN
+    # -------------------------
+
+    plan = create_plan(
         user_input
-    ).strip()
+    )
 
-    if expression:
+    # -------------------------
+    # TOOL ROUTING
+    # -------------------------
 
-        result = calculate(
-            expression
-        )
+    tool_result = route_tool(
+        user_input
+    )
 
-        if result is not None:
+    print(
+        "TOOL USED:",
+        tool_result
+    )
 
-            return {
+    if tool_result["tool"] is not None:
 
-                "tool":
-                "calculator",
+        return {
 
-                "result":
-                result
+            "plan":
+            plan,
+
+            "observation":
+            tool_result,
+
+            "response":
+            tool_result["result"]
+        }
+
+    # -------------------------
+    # MEMORY
+    # -------------------------
+
+    history = get_history()
+
+    if len(history) == 0:
+
+        history = [
+
+            {
+                "role": "user",
+
+                "content": user_input
             }
+        ]
+
+    # -------------------------
+    # LLM FALLBACK
+    # -------------------------
+
+    response = generate_response(
+        history
+    )
 
     return {
 
-        "tool":
-        None,
+        "plan":
+        plan,
 
-        "result":
-        None
+        "observation":
+        "none",
+
+        "response":
+        response
     }
