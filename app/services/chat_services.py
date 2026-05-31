@@ -71,7 +71,7 @@ def process_chat(user_input):
         "response":
         response,
         "plan":
-          plan,
+          plan
     })
 
  
