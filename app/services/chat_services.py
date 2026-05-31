@@ -37,6 +37,10 @@ def process_chat(user_input):
         response
     )
 
+    plan = agent_result[
+    "plan"
+]
+
     print(
         "CURRENT MEMORY:"
     )
@@ -65,8 +69,12 @@ def process_chat(user_input):
         user_input,
 
         "response":
-        response
+        response,
+        "plan":
+          plan,
     })
+
+ 
 
     return {
 
