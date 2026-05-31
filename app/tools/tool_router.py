@@ -1,3 +1,5 @@
+import re
+
 from tools.calculator import (
     calculate
 )
@@ -5,34 +7,34 @@ from tools.calculator import (
 
 def route_tool(user_input):
 
-    math_chars = [
-        "+",
-        "-",
-        "*",
-        "/"
-    ]
+    expression = re.sub(
+        r"[^0-9+\-*/(). ]",
+        "",
+        user_input
+    ).strip()
 
-    if any(
-        char in user_input
-        for char in math_chars
-    ):
+    if expression:
 
         result = calculate(
-            user_input
+            expression
         )
 
         if result is not None:
 
             return {
 
-                "tool": "calculator",
+                "tool":
+                "calculator",
 
-                "result": result
+                "result":
+                result
             }
 
     return {
 
-        "tool": None,
+        "tool":
+        None,
 
-        "result": None
+        "result":
+        None
     }
