@@ -1,41 +1,38 @@
-from tools.tool_registry import (
-    TOOL_REGISTRY
+from tools.calculator import (
+    calculate
 )
 
 
-def execute_tool(user_input):
+def route_tool(user_input):
 
-    lowered = user_input.lower()
-
-
-    if "time" in lowered:
-
-        return TOOL_REGISTRY[
-            "time"
-        ](user_input)
-
+    math_chars = [
+        "+",
+        "-",
+        "*",
+        "/"
+    ]
 
     if any(
-
-        char.isdigit()
-
-        for char in user_input
+        char in user_input
+        for char in math_chars
     ):
 
-        cleaned = (
-
+        result = calculate(
             user_input
-
-            .replace("calculate", "")
-
-            .replace("what is", "")
-
-            .strip()
         )
 
-        return TOOL_REGISTRY[
-            "calculator"
-        ](cleaned)
+        if result is not None:
 
+            return {
 
-    return None
+                "tool": "calculator",
+
+                "result": result
+            }
+
+    return {
+
+        "tool": None,
+
+        "result": None
+    }
