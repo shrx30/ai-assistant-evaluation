@@ -1,69 +1,40 @@
-from models.oss_model import (
-    generate_response
-)
+import re
 
-from memory.memory_manager import (
-    get_history
-)
-
-from core.planner import (
-    create_plan
-)
-
-from tools.tool_router import (
-    route_tool
+from tools.calculator import (
+    calculate
 )
 
 
-def run_agent(user_input):
+def route_tool(user_input):
 
-    plan = create_plan(
+    expression = re.sub(
+        r"[^0-9+\-*/(). ]",
+        "",
         user_input
-    )
+    ).strip()
 
-    tool_result = route_tool(
-        user_input
-    )
+    if expression:
 
-    print(
-        "TOOL USED:",
-        tool_result
-    )
+        result = calculate(
+            expression
+        )
 
-    if tool_result["tool"] == "calculator":
+        if result is not None:
 
-        return {
+            return {
 
-            "plan": plan,
+                "tool":
+                "calculator",
 
-            "observation": tool_result,
-
-            "response": tool_result[
-                "result"
-            ]
-        }
-
-    history = get_history()
-
-    if len(history) == 0:
-
-        history = [
-
-            {
-                "role": "user",
-                "content": user_input
+                "result":
+                result
             }
-        ]
-
-    response = generate_response(
-        history
-    )
 
     return {
 
-        "plan": plan,
+        "tool":
+        None,
 
-        "observation": "none",
-
-        "response": response
+        "result":
+        None
     }
