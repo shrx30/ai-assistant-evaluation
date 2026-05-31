@@ -25,7 +25,7 @@ def run_agent(user_input):
         user_input
     )
 
-    if tool_result["tool"] is not None:
+    if tool_result["tool"] == "calculator":
 
         return {
 
