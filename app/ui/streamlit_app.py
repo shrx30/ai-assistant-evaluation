@@ -431,3 +431,41 @@ elif page == "Memory Viewer":
      st.json(
         memory
     )
+
+
+# -------------------------
+# GUARDRAIL METRICS
+# -------------------------
+
+if "safe_request" in df.columns:
+
+    blocked_requests = len(
+
+        df[
+            df["safe_request"]
+            == False
+        ]
+    )
+
+    safe_requests = len(
+
+        df[
+            df["safe_request"]
+            == True
+        ]
+    )
+
+    col3, col4 = st.columns(2)
+
+    col3.metric(
+        "Safe Requests",
+        safe_requests
+    )
+
+    col4.metric(
+        "Blocked Requests",
+        blocked_requests
+    )
+
+
+
