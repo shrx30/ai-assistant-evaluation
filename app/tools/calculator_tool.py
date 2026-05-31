@@ -1,11 +1,11 @@
-def calculator_tool(query):
+def calculate(expression):
 
     try:
 
-        result = eval(query)
+        result = eval(expression)
 
         return str(result)
 
     except Exception:
 
-        return "Invalid calculation."
+        return None
