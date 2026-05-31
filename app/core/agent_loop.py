@@ -6,8 +6,16 @@ from memory.memory_manager import (
     get_history
 )
 
+from core.planner import (
+    create_plan
+)
+
 
 def run_agent(user_input):
+
+    plan = create_plan(
+        user_input
+    )
 
     history = get_history()
 
@@ -27,9 +35,9 @@ def run_agent(user_input):
 
     return {
 
-        "plan": "disabled",
+        "plan": plan,
 
-        "observation": "disabled",
+        "observation": "none",
 
         "response": response
     }
