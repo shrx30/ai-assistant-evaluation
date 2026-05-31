@@ -32,21 +32,17 @@ def process_chat(user_input):
         "response"
     ]
 
+    plan = agent_result[
+        "plan"
+    ]
+
+    observation = agent_result[
+        "observation"
+    ]
+
     add_message(
         "assistant",
         response
-    )
-
-    plan = agent_result[
-    "plan"
-]
-
-    print(
-        "CURRENT MEMORY:"
-    )
-
-    print(
-        get_history()
     )
 
     latency = round(
@@ -70,11 +66,13 @@ def process_chat(user_input):
 
         "response":
         response,
-        "plan":
-          plan
-    })
 
- 
+        "plan":
+        plan,
+
+        "observation":
+        observation
+    })
 
     return {
 
