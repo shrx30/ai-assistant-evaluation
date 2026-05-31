@@ -1,27 +1,27 @@
-BLOCKED_PATTERNS = [
+BLOCKED_WORDS = [
 
-    "ransomware",
-    "phishing",
-    "hack wifi",
-    "steal passwords",
+    "hack",
+
     "malware",
-    "keylogger",
-    "ddos",
-    "exploit"
 
+    "exploit",
+
+    "virus",
+
+    "phishing",
+
+    "ransomware"
 ]
 
 
-def guardrail_check(prompt):
+def is_safe(text):
 
-    prompt_lower = prompt.lower()
+    text = text.lower()
 
-    for pattern in BLOCKED_PATTERNS:
+    for word in BLOCKED_WORDS:
 
-        if pattern in prompt_lower:
+        if word in text:
 
-            return False, (
-                "Request blocked by safety guardrails."
-            )
+            return False
 
-    return True, None
+    return True
