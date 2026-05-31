@@ -10,12 +10,33 @@ from core.planner import (
     create_plan
 )
 
+from core.tool_router import (
+    route_tool
+)
+
 
 def run_agent(user_input):
 
     plan = create_plan(
         user_input
     )
+
+    tool_result = route_tool(
+        user_input
+    )
+
+    if tool_result["tool"] is not None:
+
+        return {
+
+            "plan": plan,
+
+            "observation": tool_result,
+
+            "response": tool_result[
+                "result"
+            ]
+        }
 
     history = get_history()
 
